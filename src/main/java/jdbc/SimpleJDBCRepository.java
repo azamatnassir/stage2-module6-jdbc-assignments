@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +49,7 @@ public class SimpleJDBCRepository {
             """;
 
     public Long createUser(User user) {
+        Long userId = null;
         try (Connection con = CustomDataSource.getInstance().getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(createUserSQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, user.getFirstName());
@@ -58,57 +58,59 @@ public class SimpleJDBCRepository {
 
             preparedStatement.executeUpdate();
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-            Long userId = null;
             if (generatedKeys.next()) {
                 userId = generatedKeys.getLong("id");
                 user.setId(userId);
             }
             return userId;
-        } catch (SQLException | IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            e.fillInStackTrace();
         }
+        return userId;
     }
 
     public User findUserById(Long userId) {
+        User result = null;
         try (Connection con = CustomDataSource.getInstance().getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(findUserByIdSQL)) {
             preparedStatement.setLong(1, userId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            User user = null;
             if (resultSet.next()) {
-                user = User.builder()
+                result = User.builder()
                         .id(resultSet.getLong("id"))
                         .firstName(resultSet.getString("firstname"))
                         .lastName(resultSet.getString("lastname"))
                         .age(resultSet.getInt("age"))
                         .build();
             }
-            return user;
-        } catch (SQLException | IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            return result;
+        } catch (SQLException e) {
+            e.fillInStackTrace();
         }
+        return result;
     }
 
     public User findUserByName(String userName) {
+        User result = null;
         try (Connection con = CustomDataSource.getInstance().getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(findUserByNameSQL)) {
             preparedStatement.setString(1, userName);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            User user = null;
             if (resultSet.next()) {
-                user = User.builder()
+                result = User.builder()
                         .id(resultSet.getLong("id"))
                         .firstName(resultSet.getString("firstname"))
                         .lastName(resultSet.getString("lastname"))
                         .age(resultSet.getInt("age"))
                         .build();
             }
-            return user;
-        } catch (SQLException | IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            return result;
+        } catch (SQLException e) {
+            e.fillInStackTrace();
         }
+        return result;
     }
 
     public List<User> findAllUser() {
@@ -126,12 +128,14 @@ public class SimpleJDBCRepository {
                         .build());
             }
             return users;
-        } catch (SQLException | IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            e.fillInStackTrace();
         }
+        return users;
     }
 
     public User updateUser(User user) {
+        User result = null;
         try (Connection con = CustomDataSource.getInstance().getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(updateUserSQL)) {
             preparedStatement.setString(1, user.getFirstName());
@@ -139,15 +143,15 @@ public class SimpleJDBCRepository {
             preparedStatement.setInt(3, user.getAge());
             preparedStatement.setLong(4, user.getId());
 
-            User updatedUser = null;
             int updatedRows = preparedStatement.executeUpdate();
             if (updatedRows == 1) {
-                updatedUser = findUserById(user.getId());
+                result = findUserById(user.getId());
             }
-            return updatedUser;
-        } catch (SQLException | IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            return result;
+        } catch (SQLException e) {
+            e.fillInStackTrace();
         }
+        return result;
     }
 
     public void deleteUser(Long userId) {
@@ -156,8 +160,8 @@ public class SimpleJDBCRepository {
             preparedStatement.setLong(1, userId);
 
             preparedStatement.executeUpdate();
-        } catch (SQLException | IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            e.fillInStackTrace();
         }
     }
 }

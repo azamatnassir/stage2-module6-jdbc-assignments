@@ -29,12 +29,17 @@ public class CustomDataSource implements DataSource {
         this.name = name;
     }
 
-    public static CustomDataSource getInstance() throws IOException, ClassNotFoundException {
+    public static CustomDataSource getInstance(){
         if (instance == null) {
             return instance;
         }
 
-        properties.load(CustomDataSource.class.getClassLoader().getResourceAsStream("app.properties"));
+        try {
+            properties.load(CustomDataSource.class.getClassLoader().getResourceAsStream("app.properties"));
+        } catch (IOException e) {
+            e.fillInStackTrace();
+        }
+
         synchronized (CustomDataSource.class) {
             if (instance == null) {
                 instance = new CustomDataSource(
@@ -43,7 +48,12 @@ public class CustomDataSource implements DataSource {
                         properties.getProperty("postgres.password"),
                         properties.getProperty("postgres.user")
                 );
-                Class.forName(properties.getProperty("postgres.driver"));
+
+                try {
+                    Class.forName(properties.getProperty("postgres.driver"));
+                } catch (ClassNotFoundException e) {
+                    e.fillInStackTrace();
+                }
             }
         }
         return instance;

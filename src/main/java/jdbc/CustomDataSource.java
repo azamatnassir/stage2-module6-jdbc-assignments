@@ -23,11 +23,11 @@ public class CustomDataSource implements DataSource {
     private final String name;
     private final String password;
 
-    private CustomDataSource(String driver, String url, String password, String name) {
+    private CustomDataSource(String driver, String url, String name, String password) {
         this.driver = driver;
         this.url = url;
-        this.password = password;
         this.name = name;
+        this.password = password;
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
@@ -35,7 +35,7 @@ public class CustomDataSource implements DataSource {
         }
     }
 
-    public static CustomDataSource getInstance(){
+    public static CustomDataSource getInstance() {
         if (instance == null) {
             synchronized (CustomDataSource.class) {
                 if (instance == null) {
@@ -50,7 +50,6 @@ public class CustomDataSource implements DataSource {
         }
         return instance;
     }
-
     private static Properties loadProperties(String propertiesFilename){
         Properties properties = new Properties();
         ClassLoader loader = CustomDataSource.class.getClassLoader();
@@ -60,53 +59,52 @@ public class CustomDataSource implements DataSource {
             }
             properties.load(stream);
         }catch (IOException e){
-            e.fillInStackTrace();
+            e.printStackTrace();
         }
         return properties;
     }
 
-    @Override
     public Connection getConnection() throws SQLException {
         return new CustomConnector().getConnection(url, name, password);
     }
 
-    @Override
     public Connection getConnection(String username, String password) throws SQLException {
         return new CustomConnector().getConnection(url, username, password);
     }
 
+
     @Override
-    public PrintWriter getLogWriter() {
+    public PrintWriter getLogWriter() throws SQLException {
         return null;
     }
 
     @Override
-    public void setLogWriter(PrintWriter out) {
+    public void setLogWriter(PrintWriter out) throws SQLException {
 
     }
 
     @Override
-    public void setLoginTimeout(int seconds) {
+    public void setLoginTimeout(int seconds) throws SQLException {
 
     }
 
     @Override
-    public int getLoginTimeout() {
+    public int getLoginTimeout() throws SQLException {
         return 0;
     }
 
     @Override
-    public Logger getParentLogger() {
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return null;
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) {
+    public <T> T unwrap(Class<T> iface) throws SQLException {
         return null;
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> iface) {
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }
 }

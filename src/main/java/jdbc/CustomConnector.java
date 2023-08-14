@@ -11,9 +11,9 @@ public class CustomConnector {
     }
 
     public Connection getConnection(String url, String user, String password) throws SQLException {
-        Properties properties = new Properties();
-        properties.setProperty("user", user);
-        properties.setProperty("password", password);
-        return DriverManager.getConnection(url, properties);
+        Properties props = new Properties();
+        props.setProperty("user", user);
+        props.setProperty("password", password);
+        return DriverManager.getConnection(url, props);
     }
 }

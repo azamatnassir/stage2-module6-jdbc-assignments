@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 @Setter
 public class CustomDataSource implements DataSource {
     private static volatile CustomDataSource instance;
-    private static Properties properties = new Properties();
+    private static final Properties properties = new Properties();
     private final String driver;
     private final String url;
     private final String name;
@@ -31,28 +31,23 @@ public class CustomDataSource implements DataSource {
 
     public static CustomDataSource getInstance(){
         if (instance == null) {
-            return instance;
-        }
+            synchronized (properties){
+                if (instance == null) {
+                    try {
+                        Properties properties = new Properties();
+                        properties.load(
+                                CustomDataSource.class.getClassLoader().getResourceAsStream("app.properties")
+                        );
+                        instance = new CustomDataSource(
+                                properties.getProperty("postgres.driver"),
+                                properties.getProperty("postgres.url"),
+                                properties.getProperty("postgres.name"),
+                                properties.getProperty("postgres.password")
 
-        try {
-            properties.load(CustomDataSource.class.getClassLoader().getResourceAsStream("app.properties"));
-        } catch (IOException e) {
-            e.fillInStackTrace();
-        }
-
-        synchronized (CustomDataSource.class) {
-            if (instance == null) {
-                instance = new CustomDataSource(
-                        properties.getProperty("postgres.driver"),
-                        properties.getProperty("postgres.url"),
-                        properties.getProperty("postgres.password"),
-                        properties.getProperty("postgres.user")
-                );
-
-                try {
-                    Class.forName(properties.getProperty("postgres.driver"));
-                } catch (ClassNotFoundException e) {
-                    e.fillInStackTrace();
+                        );
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }

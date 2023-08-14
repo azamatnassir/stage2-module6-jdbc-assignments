@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 @Setter
 public class CustomDataSource implements DataSource {
     private static volatile CustomDataSource instance;
+    private static final Object obj = new Object();
     private static final Properties properties = new Properties();
     private final String driver;
     private final String url;
@@ -31,7 +32,7 @@ public class CustomDataSource implements DataSource {
 
     public static CustomDataSource getInstance(){
         if (instance == null) {
-            synchronized (properties){
+            synchronized (obj){
                 if (instance == null) {
                     try {
                         Properties properties = new Properties();
@@ -46,7 +47,7 @@ public class CustomDataSource implements DataSource {
 
                         );
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        e.fillInStackTrace();
                     }
                 }
             }

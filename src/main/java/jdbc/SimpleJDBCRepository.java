@@ -19,6 +19,7 @@ public class SimpleJDBCRepository {
     private Connection connection = null;
     private PreparedStatement ps = null;
     private Statement st = null;
+    private CustomDataSource dataSource = CustomDataSource.getInstance();
 
     private static final String createUserSQL = """
             INSERT INTO myusers (firstname, lastname, age)
@@ -50,13 +51,13 @@ public class SimpleJDBCRepository {
 
     public Long createUser(User user) {
         Long userId = null;
-        try (Connection con = CustomDataSource.getInstance().getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(createUserSQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, user.getFirstName());
             preparedStatement.setString(2, user.getLastName());
             preparedStatement.setInt(3, user.getAge());
 
-            preparedStatement.executeUpdate();
+            preparedStatement.execute();
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 userId = generatedKeys.getLong("id");
@@ -71,7 +72,7 @@ public class SimpleJDBCRepository {
 
     public User findUserById(Long userId) {
         User result = null;
-        try (Connection con = CustomDataSource.getInstance().getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(findUserByIdSQL)) {
             preparedStatement.setLong(1, userId);
 
@@ -93,7 +94,7 @@ public class SimpleJDBCRepository {
 
     public User findUserByName(String userName) {
         User result = null;
-        try (Connection con = CustomDataSource.getInstance().getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(findUserByNameSQL)) {
             preparedStatement.setString(1, userName);
 
@@ -115,7 +116,7 @@ public class SimpleJDBCRepository {
 
     public List<User> findAllUser() {
         List<User> users = new ArrayList<>();
-        try (Connection con = CustomDataSource.getInstance().getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(findAllUserSQL)) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -136,7 +137,7 @@ public class SimpleJDBCRepository {
 
     public User updateUser(User user) {
         User result = null;
-        try (Connection con = CustomDataSource.getInstance().getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(updateUserSQL)) {
             preparedStatement.setString(1, user.getFirstName());
             preparedStatement.setString(2, user.getLastName());
@@ -155,7 +156,7 @@ public class SimpleJDBCRepository {
     }
 
     public void deleteUser(Long userId) {
-        try (Connection con = CustomDataSource.getInstance().getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(deleteUser)) {
             preparedStatement.setLong(1, userId);
 
